@@ -56,4 +56,4 @@ if __name__ == "__main__":
     start_date = datetime(2020, 4, 12, 9, 50)
     scheduler.add_job(func=trigger_stand_up, trigger=IntervalTrigger(days=1, start_date=start_date))
     scheduler.start()
-    app.run(port=9292)
+    app.run(host="0.0.0.0", port=os.environ["PORT"])
