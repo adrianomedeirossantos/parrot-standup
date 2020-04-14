@@ -54,7 +54,7 @@ if __name__ == "__main__":
     ssl_context = ssl_lib.create_default_context(cafile=certifi.where())
 
     scheduler = BackgroundScheduler()
-    start_date = datetime(2020, 4, 12, 9, 50)
-    scheduler.add_job(func=trigger_stand_up, trigger=IntervalTrigger(days=1, start_date=start_date))
+    start_date = datetime(2020, 4, 12, 21, 55)
+    scheduler.add_job(func=trigger_stand_up, trigger=IntervalTrigger(minutes=1, start_date=start_date))
     scheduler.start()
     app.run(host="0.0.0.0", port=os.environ["PORT"])
