@@ -13,7 +13,8 @@ from slackeventsapi import SlackEventAdapter
 
 from stand_up import StandUp, StandUpService
 
-r = redis.Redis(host='localhost', port=6379, db=0)
+r = redis.Redis(os.environ["REDIS_URL"])
+# host='localhost', port=6379, db=0)
 
 app = Flask(__name__)
 slack_events_adapter = SlackEventAdapter(os.environ["SLACK_SIGNING_SECRET"], "/slack/events", app)
