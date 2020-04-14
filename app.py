@@ -23,7 +23,8 @@ slack_events_adapter = SlackEventAdapter(
     app
 )
 slack_web_client = WebClient(token=os.environ["SLACK_BOT_TOKEN"])
-channel = "G011U6TETPV"
+# channel = "G011U6TETPV"
+channel = "G0124A0PZ09"
 stand_up_service = StandUpService(slack_client=slack_web_client, redis=r)
 
 
