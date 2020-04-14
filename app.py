@@ -18,7 +18,7 @@ r = redis.Redis(host='localhost', port=6379, db=0)
 app = Flask(__name__)
 slack_events_adapter = SlackEventAdapter(os.environ["SLACK_SIGNING_SECRET"], "/slack/events", app)
 slack_web_client = WebClient(token=os.environ["SLACK_BOT_TOKEN"])
-channel = "G0129VCNU5N"
+channel = "G011U6TETPV"
 stand_up_service = StandUpService(slack_client=slack_web_client, redis=r)
 
 @app.route('/stand_up')
