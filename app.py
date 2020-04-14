@@ -13,13 +13,20 @@ from slackeventsapi import SlackEventAdapter
 
 from stand_up import StandUp, StandUpService
 
-r = redis.Redis(host='localhost', port=6379, db=0)
+r = redis.from_url(os.environ["REDIS_URL"])
+# host='localhost', port=6379, db=0)
 
 app = Flask(__name__)
-slack_events_adapter = SlackEventAdapter(os.environ["SLACK_SIGNING_SECRET"], "/slack/events", app)
+slack_events_adapter = SlackEventAdapter(
+    os.environ["SLACK_SIGNING_SECRET"],
+    "/slack/events",
+    app
+)
 slack_web_client = WebClient(token=os.environ["SLACK_BOT_TOKEN"])
-channel = "G011U6TETPV"
+# channel = "G011U6TETPV"
+channel = "G0124A0PZ09"
 stand_up_service = StandUpService(slack_client=slack_web_client, redis=r)
+
 
 @app.route('/stand_up')
 def trigger_stand_up():
@@ -53,7 +60,7 @@ if __name__ == "__main__":
     ssl_context = ssl_lib.create_default_context(cafile=certifi.where())
 
     scheduler = BackgroundScheduler()
-    start_date = datetime(2020, 4, 12, 9, 50)
+    start_date = datetime(2020, 4, 12, 8, 50)
     scheduler.add_job(func=trigger_stand_up, trigger=IntervalTrigger(days=1, start_date=start_date))
     scheduler.start()
-    app.run(port=9292)
+    app.run(host="0.0.0.0", port=os.environ["PORT"])
