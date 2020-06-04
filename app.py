@@ -54,7 +54,12 @@ def message(payload):
     if "bot_profile" in event:
         return
 
-    stand_up_service.on_update(user, event["text"])
+    if event["subtype"] == "message_changed":
+        stand_up_service.update_answer(
+            user, event["message"]["client_msg_id"], event["message"]["text"]
+        )
+    else:
+        stand_up_service.store_answer(user, event["client_msg_id"], event["text"])
 
 
 if __name__ == "__main__":
