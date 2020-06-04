@@ -14,40 +14,44 @@ from slackeventsapi import SlackEventAdapter
 from stand_up import StandUp, StandUpService
 
 r = redis.from_url(os.environ["REDIS_URL"])
-# host='localhost', port=6379, db=0)
 
 app = Flask(__name__)
 slack_events_adapter = SlackEventAdapter(
-    os.environ["SLACK_SIGNING_SECRET"],
-    "/slack/events",
-    app
+    os.environ["SLACK_SIGNING_SECRET"], "/slack/events", app
 )
 slack_web_client = WebClient(token=os.environ["SLACK_BOT_TOKEN"])
-# channel = "G011U6TETPV"
-channel = "G0124A0PZ09"
+channel = "G011U6TETPV"
+# channel = "G0124A0PZ09" - pricing old standup
+# channel = "G014NBSPUP8"  # Network Engineering Standup
 stand_up_service = StandUpService(slack_client=slack_web_client, redis=r)
 
 
-@app.route('/stand_up')
+@app.route("/stand_up")
 def trigger_stand_up():
+    weekday = datetime.today().weekday()
+    if weekday >= 5:
+        return "Skipping standup as it's weekend"
+
     response = slack_web_client.conversations_members(channel=channel)
-    members = response.data['members']
+    members = response.data["members"]
     for m in members:
         stand_up = StandUp(user=m, channel=channel)
         stand_up_service.start(stand_up)
 
-    return 'Stand up just started!'
+    return "Stand up just started!"
 
 
 @slack_events_adapter.on("message")
 def message(payload):
+    print(payload)
+
     event = payload.get("event", {})
 
     if event["channel_type"] != "im":
         return
 
     user = event.get("user")
-    if 'bot_profile' in event:
+    if "bot_profile" in event:
         return
 
     stand_up_service.on_update(user, event["text"])
@@ -60,7 +64,9 @@ if __name__ == "__main__":
     ssl_context = ssl_lib.create_default_context(cafile=certifi.where())
 
     scheduler = BackgroundScheduler()
-    start_date = datetime(2020, 4, 12, 8, 50)
-    scheduler.add_job(func=trigger_stand_up, trigger=IntervalTrigger(days=1, start_date=start_date))
+    start_date = datetime(2020, 6, 5, 8, 50)
+    scheduler.add_job(
+        func=trigger_stand_up, trigger=IntervalTrigger(days=1, start_date=start_date)
+    )
     scheduler.start()
     app.run(host="0.0.0.0", port=os.environ["PORT"])
