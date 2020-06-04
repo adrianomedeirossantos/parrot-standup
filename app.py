@@ -59,7 +59,9 @@ def message(payload):
             user, event["message"]["client_msg_id"], event["message"]["text"]
         )
     else:
-        stand_up_service.store_answer(user, event["client_msg_id"], event["text"])
+        stand_up_service.store_answer(
+            event["message"]["user"], event["client_msg_id"], event["text"]
+        )
 
 
 if __name__ == "__main__":
