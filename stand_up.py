@@ -16,7 +16,7 @@ class StandUp:
         ]
         self.number_of_questions = len(self.questions)
         self.answered_questions = []
-        self.answers = []
+        self.answers = {}
 
     def has_started(self):
         return len(self.questions) == self.number_of_questions
@@ -67,7 +67,7 @@ class StandUpService:
 
         stand_up = pickle.loads(packed_stand_up)
 
-        stand_up.answers.append({message_id: answer})
+        stand_up.answers[message_id] = answer
 
         if stand_up.has_pending_questions():
             self.slack_client.chat_postMessage(
