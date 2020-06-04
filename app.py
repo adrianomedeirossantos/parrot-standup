@@ -54,7 +54,7 @@ def message(payload):
     if "bot_profile" in event:
         return
 
-    if event["subtype"] == "message_changed":
+    if event.get("subtype") != None && event["subtype"] == "message_changed":
         stand_up_service.update_answer(
             user, event["message"]["client_msg_id"], event["message"]["text"]
         )
