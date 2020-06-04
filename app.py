@@ -20,9 +20,9 @@ slack_events_adapter = SlackEventAdapter(
     os.environ["SLACK_SIGNING_SECRET"], "/slack/events", app
 )
 slack_web_client = WebClient(token=os.environ["SLACK_BOT_TOKEN"])
-channel = "G011U6TETPV"
+# channel = "G011U6TETPV" - Alex test channel
 # channel = "G0124A0PZ09" - pricing old standup
-# channel = "G014NBSPUP8"  # Network Engineering Standup
+channel = "G014NBSPUP8"  # Network Engineering Standup
 stand_up_service = StandUpService(slack_client=slack_web_client, redis=r)
 
 
@@ -43,8 +43,6 @@ def trigger_stand_up():
 
 @slack_events_adapter.on("message")
 def message(payload):
-    print(payload)
-
     event = payload.get("event", {})
 
     if event["channel_type"] != "im":

@@ -50,10 +50,6 @@ class StandUpService:
         return
 
     def update_answer(self, user, message_id, answer):
-        print("----")
-        print(message_id)
-        print(answer)
-        print("----")
         packed_stand_up = self.redis.get(user)
 
         if packed_stand_up is None:
