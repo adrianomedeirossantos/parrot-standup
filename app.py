@@ -22,7 +22,7 @@ slack_events_adapter = SlackEventAdapter(
 slack_web_client = WebClient(token=os.environ["SLACK_BOT_TOKEN"])
 # channel = "G011U6TETPV" - Alex test channel
 # channel = "G0124A0PZ09" - pricing old standup
-channel = "G014NBSPUP8"  # Network Engineering Standup
+channel = os.environ["STAND_UP_CHANNEL"]  # Network Engineering Standup
 stand_up_service = StandUpService(slack_client=slack_web_client, redis=r)
 
 
