@@ -12,7 +12,7 @@ jobs:
           name: "Install and execute pipenv"
           command: |
             sudo pip install pipenv
-            pipenv install
+            pipenv install --dev
 
       - run:
           name: "Tests"
