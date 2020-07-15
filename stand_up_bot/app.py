@@ -11,7 +11,7 @@ from flask import Flask
 from slack import WebClient
 from slackeventsapi import SlackEventAdapter
 
-from stand_up_bot.stand_up import StandUp, StandUpService
+from stand_up import StandUp, StandUpService
 
 r = redis.from_url(os.environ["REDIS_URL"])
 

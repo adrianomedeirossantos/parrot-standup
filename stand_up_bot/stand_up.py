@@ -1,7 +1,9 @@
 import csv
-import random
+import os
 import pickle
+import random
 import redis
+
 from slack import WebClient
 
 
@@ -32,10 +34,11 @@ class StandUp:
 
 class StandUpService:
     def __init__(self, slack_client: WebClient, redis: redis.Redis):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
         self.slack_client = slack_client
         self.redis = redis
-        self.greetings = self._load_messages("greetings.csv")
-        self.good_bye = self._load_messages("good_bye.csv")
+        self.greetings = self._load_messages(os.path.join(dir_path, "greetings.csv"))
+        self.good_bye = self._load_messages(os.path.join(dir_path, "good_bye.csv"))
 
     def start(self, stand_up):
         greetings = self._greetings()
