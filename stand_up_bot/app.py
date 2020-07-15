@@ -11,7 +11,10 @@ from flask import Flask
 from slack import WebClient
 from slackeventsapi import SlackEventAdapter
 
-from stand_up import StandUp, StandUpService
+from .models import StandUp
+from .services import SalutationService, StandUpService
+
+DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 r = redis.from_url(os.environ["REDIS_URL"])
 
@@ -24,7 +27,11 @@ slack_web_client = WebClient(token=os.environ["SLACK_BOT_TOKEN"])
 # channel = "G0124A0PZ09" - pricing old standup
 network_engineering_channel = "G014NBSPUP8"
 channel = os.getenv("STAND_UP_CHANNEL", network_engineering_channel)
-stand_up_service = StandUpService(slack_client=slack_web_client, redis=r)
+salutation_service = SalutationService(
+    greetings_file=os.path.join(DIR_PATH, "data/greetings.csv"),
+    farewells_file=os.path.join(DIR_PATH, "data/fareweels.csv"),
+)
+stand_up_service = StandUpService(slack_client=slack_web_client, redis=r, salutation_service=salutation_service)
 
 
 @app.route("/stand_up")

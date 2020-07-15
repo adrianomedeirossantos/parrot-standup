@@ -1,5 +1,4 @@
 import csv
-import os
 import pickle
 import random
 import redis
@@ -7,41 +6,45 @@ import redis
 from slack import WebClient
 
 
-class StandUp:
-    def __init__(self, user, channel):
-        self.user = user
-        self.channel = channel
-        self.questions = [
-            "What did you do yesterday?",
-            "What are you going to do today?",
-            "Any blockers?",
-        ]
-        self.number_of_questions = len(self.questions)
-        self.answered_questions = []
-        self.answers = {}
+class SalutationService:
+    def __init__(self, greetings_file, farewells_file):
+        self.greetings = self.__load_messages(greetings_file)
+        self.farewells = self.__load_messages(farewells_file)
 
-    def has_started(self):
-        return len(self.questions) == self.number_of_questions
+    def say_hi(self):
+        if not self.greetings:
+            return "Hello there! How you doing?"
 
-    def has_pending_questions(self):
-        return len(self.questions) > 0
+        return self.greetings[random.randint(0, len(self.greetings) - 1)]
 
-    def next_question(self):
-        next = self.questions.pop(0)
-        self.answered_questions.append(next)
-        return next
+    def say_good_bye(self):
+        if not self.farewells:
+            return "Good-bye!"
+
+        return self.farewells[random.randint(0, len(self.farewells) - 1)]
+
+    def __load_messages(self, filename):
+        rows = []
+
+        try:
+            with open(filename) as csv_data_file:
+                csv_reader = csv.reader(csv_data_file, delimiter="\n")
+                for row in csv_reader:
+                    rows.append(row[0])
+        except OSError:
+            return []
+
+        return rows
 
 
 class StandUpService:
-    def __init__(self, slack_client: WebClient, redis: redis.Redis):
-        dir_path = os.path.dirname(os.path.realpath(__file__))
+    def __init__(self, slack_client: WebClient, redis: redis.Redis, salutation_service: SalutationService):
         self.slack_client = slack_client
         self.redis = redis
-        self.greetings = self._load_messages(os.path.join(dir_path, "greetings.csv"))
-        self.good_bye = self._load_messages(os.path.join(dir_path, "good_bye.csv"))
+        self.salutation_service = salutation_service
 
     def start(self, stand_up):
-        greetings = self._greetings()
+        greetings = f"{self.salutation_service.say_hi()}\nIt's time for our *Standup*!"
 
         self.slack_client.chat_postMessage(
             channel=stand_up.user, text=f"{greetings}\n{stand_up.next_question()}",
@@ -80,15 +83,11 @@ class StandUpService:
             self.redis.set(stand_up.user, pickled_object)
         else:
             self.slack_client.chat_postMessage(
-                channel=stand_up.user, text=self._good_bye(),
+                channel=stand_up.user, text=self.salutation_service.say_good_bye(),
             )
 
             self._send_summary(stand_up)
             self.redis.delete(stand_up.user)
-
-    def _greetings(self):
-        message = self.greetings[random.randint(0, len(self.greetings) - 1)]
-        return f"{message}\nIt's time for our *Standup*!"
 
     def _send_summary(self, stand_up):
         q = list(map(lambda x: f"*{x}*", stand_up.answered_questions))
@@ -111,16 +110,3 @@ class StandUpService:
             ],
         )
 
-    def _good_bye(self):
-        message = self.good_bye[random.randint(0, len(self.good_bye) - 1)]
-        return f"{message}\n I have to go to the beach now :beach_with_umbrella:!"
-
-    def _load_messages(self, filename):
-        rows = []
-
-        with open(filename) as csvDataFile:
-            csvReader = csv.reader(csvDataFile, delimiter="\n")
-            for row in csvReader:
-                rows.append(row[0])
-
-        return rows
