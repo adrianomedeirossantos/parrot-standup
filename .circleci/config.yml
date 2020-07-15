@@ -13,11 +13,3 @@ jobs:
           command: |
             sudo pip install pipenv
             pipenv install --dev
-
-      - run:
-          name: "Tests"
-          command: |
-            pipenv run python -m pytest
-
-      - store_test_results:
-          path: test-results
