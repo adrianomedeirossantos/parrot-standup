@@ -1,0 +1,23 @@
+version: 2
+
+jobs:
+  build:
+    working_directory: ~/circleci-parrot-standup
+    docker:
+      - image: circleci/python
+
+    steps:
+      - checkout
+      - run:
+          name: "Install and execute pipenv"
+          command: |
+            sudo pip install pipenv
+            pipenv install
+
+      - run:
+          name: "Tests"
+          command: |
+            pipenv run python -m pytest
+
+      - store_test_results:
+          path: test-results
