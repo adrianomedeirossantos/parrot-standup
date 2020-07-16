@@ -2,3 +2,4 @@
 .pytest_cache/
 .vs_code/
 .env
+*.pyc

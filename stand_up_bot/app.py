@@ -11,8 +11,8 @@ from flask import Flask
 from slack import WebClient
 from slackeventsapi import SlackEventAdapter
 
-from .models import StandUp
-from .services import SalutationService, StandUpService
+from models import StandUp
+from services import SalutationService, StandUpService
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
