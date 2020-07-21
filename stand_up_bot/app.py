@@ -31,7 +31,11 @@ salutation_service = SalutationService(
     greetings_file=os.path.join(DIR_PATH, "data/greetings.csv"),
     farewells_file=os.path.join(DIR_PATH, "data/fareweels.csv"),
 )
-stand_up_service = StandUpService(slack_client=slack_web_client, redis=r, salutation_service=salutation_service)
+stand_up_service = StandUpService(
+    slack_client=slack_web_client,
+    redis=r,
+    salutation_service=salutation_service
+)
 
 
 @app.route("/stand_up")
@@ -60,14 +64,18 @@ def message(payload):
     if "bot_profile" in event:
         return
 
-    if event.get("subtype") is not None and event["subtype"] == "message_changed":
+    if event.get("subtype") == "message_changed":
         stand_up_service.update_answer(
             event["message"]["user"],
             event["message"]["client_msg_id"],
             event["message"]["text"],
         )
     else:
-        stand_up_service.store_answer(user, event["client_msg_id"], event["text"])
+        stand_up_service.store_answer(
+            user,
+            event["client_msg_id"],
+            event["text"]
+        )
 
 
 if __name__ == "__main__":
@@ -79,7 +87,8 @@ if __name__ == "__main__":
     scheduler = BackgroundScheduler()
     start_date = datetime(2020, 6, 5, 8, 50)
     scheduler.add_job(
-        func=trigger_stand_up, trigger=IntervalTrigger(days=1, start_date=start_date)
+        func=trigger_stand_up,
+        trigger=IntervalTrigger(days=1, start_date=start_date)
     )
     scheduler.start()
     app.run(host="0.0.0.0", port=os.environ["PORT"])

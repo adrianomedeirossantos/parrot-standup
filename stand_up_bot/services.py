@@ -38,16 +38,23 @@ class SalutationService:
 
 
 class StandUpService:
-    def __init__(self, slack_client: WebClient, redis: redis.Redis, salutation_service: SalutationService):
+    def __init__(
+            self,
+            slack_client: WebClient,
+            redis: redis.Redis,
+            salutation_service: SalutationService
+    ):
         self.slack_client = slack_client
         self.redis = redis
         self.salutation_service = salutation_service
 
     def start(self, stand_up):
-        greetings = f"{self.salutation_service.say_hi()}\nIt's time for our *Standup*!"
+        intro = "It's time for our *Standup*!"
+        greetings = f"{self.salutation_service.say_hi()}\n{intro}"
 
+        start_msg = f"{greetings}\n{stand_up.next_question()}"
         self.slack_client.chat_postMessage(
-            channel=stand_up.user, text=f"{greetings}\n{stand_up.next_question()}",
+            channel=stand_up.user, text=start_msg,
         )
 
         pickled_object = pickle.dumps(stand_up)
@@ -83,7 +90,8 @@ class StandUpService:
             self.redis.set(stand_up.user, pickled_object)
         else:
             self.slack_client.chat_postMessage(
-                channel=stand_up.user, text=self.salutation_service.say_good_bye(),
+                channel=stand_up.user,
+                text=self.salutation_service.say_good_bye(),
             )
 
             self._send_summary(stand_up)
@@ -106,7 +114,11 @@ class StandUpService:
                         "text": f'*{user_info["user"]["name"]}*\'s update',
                     },
                 },
-                {"type": "context", "elements": [{"type": "mrkdwn", "text": result}]},
+                {
+                    "type": "context",
+                    "elements": [
+                        {"type": "mrkdwn", "text": result}
+                    ]
+                },
             ],
         )
-
