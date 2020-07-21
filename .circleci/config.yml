@@ -24,6 +24,10 @@ jobs:
             - "/usr/local/bin"
             - "/usr/local/lib/python3.6/site-packages"
       - run:
+          name: "Run linter"
+          command: |
+            pipenv run python -m flake8 stand_up_bot/ tests/stand_up_bot/
+      - run:
           name: "Run tests"
           command: |
             mkdir test-results
