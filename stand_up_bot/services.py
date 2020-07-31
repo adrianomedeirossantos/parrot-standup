@@ -1,9 +1,12 @@
+import abc
 import csv
 import pickle
 import random
 import redis
 
 from slack import WebClient
+
+from stand_up_bot.models import StandUp, StandUpTemplate
 
 
 class SalutationService:
@@ -35,6 +38,48 @@ class SalutationService:
             return []
 
         return rows
+
+
+class StandUpTemplateRepository:
+    @abc.abstractmethod
+    def find_all(self):
+        pass
+
+
+class StandUpTemplateEnvRepository(StandUpTemplateRepository):
+    """
+        A stand up template repository which loads templates from
+        an environment variable. Each element contains the channel
+        name and a cron expression separated by ',' and elements are
+        separated by a ';'
+
+        Eg. "channel_a,50 18 * * Mon-Fri;channel_b,50 18 * * Mon-Fri;"
+    """
+    def __init__(self, ):
+        env_templates = os.getenv("STAND_UP_TEMPLATES")
+        if env_templates:
+            self.templates = [c.strip() for c in env_templates.split(';')]
+        else:
+            self.templates = []
+
+        self.questions = [
+            "What did you do yesterday?",
+            "What are you going to do today?",
+            "Any blockers?",
+        ]
+
+    def find_all(self):
+        templates = []
+        for t in self.templates:
+            channel, cron_expression = [t.strip() for t in t.split(",")]
+            template = StandUpTemplate(
+                channel,
+                cron_expression,
+                self.questions
+            )
+            templates.append(template)
+
+        return templates
 
 
 class StandUpService:
