@@ -15,6 +15,7 @@ certifi = "*"
 flask-apscheduler = "*"
 redis = "*"
 python-dotenv = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.8"
