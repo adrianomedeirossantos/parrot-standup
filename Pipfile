@@ -16,6 +16,9 @@ flask-apscheduler = "*"
 redis = "*"
 python-dotenv = "*"
 pytest = "*"
+coverage = "*"
+codecov = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.8"

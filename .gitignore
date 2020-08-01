@@ -4,3 +4,6 @@
 .env
 *.pyc
 .vscode/
+.coverage
+coverage.xml
+test-results/
