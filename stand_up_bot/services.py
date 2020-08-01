@@ -1,9 +1,15 @@
+import abc
 import csv
+import os
 import pickle
 import random
 import redis
 
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from slack import WebClient
+
+from stand_up_bot.models import StandUp, StandUpTemplate
 
 
 class SalutationService:
@@ -37,6 +43,48 @@ class SalutationService:
         return rows
 
 
+class StandUpTemplateRepository:
+    @abc.abstractmethod
+    def find_all(self):
+        pass
+
+
+class StandUpTemplateEnvRepository(StandUpTemplateRepository):
+    """
+        A stand up template repository which loads templates from
+        an environment variable. Each element contains the channel
+        name and a cron expression separated by ',' and elements are
+        separated by a ';'
+
+        Eg. "channel_a,50 18 * * Mon-Fri;channel_b,50 18 * * Mon-Fri;"
+    """
+    def __init__(self, ):
+        env_templates = os.getenv("STAND_UP_TEMPLATES")
+        if env_templates:
+            self.templates = [c.strip() for c in env_templates.split(';')]
+        else:
+            self.templates = []
+
+        self.questions = [
+            "What did you do yesterday?",
+            "What are you going to do today?",
+            "Any blockers?",
+        ]
+
+    def find_all(self):
+        templates = []
+        for t in self.templates:
+            channel, cron_expression = [t.strip() for t in t.split(",")]
+            template = StandUpTemplate(
+                channel,
+                cron_expression,
+                self.questions
+            )
+            templates.append(template)
+
+        return templates
+
+
 class StandUpService:
     def __init__(
             self,
@@ -47,6 +95,15 @@ class StandUpService:
         self.slack_client = slack_client
         self.redis = redis
         self.salutation_service = salutation_service
+
+    def trigger(self, template):
+        response = self.slack_client.conversations_members(
+            channel=template.channel
+        )
+        members = response.data["members"]
+        for m in members:
+            stand_up = StandUp(user=m, template=template)
+            self.start(stand_up)
 
     def start(self, stand_up):
         intro = "It's time for our *Standup*!"
@@ -105,7 +162,7 @@ class StandUpService:
         result = [val for pair in zip(q, a) for val in pair]
         result = "\n".join(result)
         self.slack_client.chat_postMessage(
-            channel=stand_up.channel,
+            channel=stand_up.template.channel,
             blocks=[
                 {
                     "type": "section",
@@ -122,3 +179,26 @@ class StandUpService:
                 },
             ],
         )
+
+
+class StandUpScheduler:
+    def __init__(
+            self,
+            stand_up_service: StandUpService,
+            stand_up_template_repository: StandUpTemplateRepository
+    ):
+        self.stand_up_service = stand_up_service
+        self.stand_up_template_repository = stand_up_template_repository
+        self.scheduler = BackgroundScheduler()
+
+    def start(self):
+        templates = self.stand_up_template_repository.find_all()
+        for t in templates:
+            cron_trigger = CronTrigger.from_crontab(t.cron_expression)
+            self.scheduler.add_job(
+                func=self.stand_up_service.trigger,
+                trigger=cron_trigger,
+                args=[t]
+            )
+
+        self.scheduler.start()
