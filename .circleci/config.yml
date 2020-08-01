@@ -32,5 +32,6 @@ jobs:
           command: |
             mkdir test-results
             pipenv run python -m pytest --junitxml=test-results/junit.xml
+            pipenv run codecov
       - store_test_results:
           path: test-results
