@@ -31,7 +31,7 @@ jobs:
           name: "Run tests"
           command: |
             mkdir test-results
-            pipenv run python -m pytest --junitxml=test-results/junit.xml --cov=./stand_up_bot/
+            pipenv run python -m pytest -o junit_family=xunit2 --junitxml=test-results/junit.xml --cov=./stand_up_bot/
             pipenv run codecov
       - store_test_results:
           path: test-results
