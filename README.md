@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/adrianomedeirossantos/parrot-standup/branch/master/graph/badge.svg)](https://codecov.io/gh/adrianomedeirossantos/parrot-standup)
+
 # Parrot Stand Up
 
 Asynchronous Stand Up Slack Bot
@@ -21,4 +23,3 @@ pipenv shell
 ```.shell
 pipenv run python app.py
 ```
-
