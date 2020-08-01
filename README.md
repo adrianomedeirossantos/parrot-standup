@@ -1,3 +1,4 @@
+[![CircleCI](https://circleci.com/gh/adrianomedeirossantos/parrot-standup.svg?style=svg)](https://circleci.com/gh/adrianomedeirossantos/parrot-standup)
 [![codecov](https://codecov.io/gh/adrianomedeirossantos/parrot-standup/branch/master/graph/badge.svg)](https://codecov.io/gh/adrianomedeirossantos/parrot-standup)
 
 # Parrot Stand Up
